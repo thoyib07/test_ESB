@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('due_date');
             $table->float('subtotal',16,2);
             $table->float('tax',16,2);
+            $table->integer('taxCal',10)->unsigned();
             $table->float('total_order',16,2);
             $table->float('payment',16,2);
             $table->enum('status',['PAID','UNPAID']);

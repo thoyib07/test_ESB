@@ -174,6 +174,7 @@ CREATE TABLE `invoices` (
   `due_date` date NOT NULL,
   `subtotal` double(16,2) NOT NULL,
   `tax` double(16,2) NOT NULL,
+  `taxCal` int(10) NOT NULL,
   `total_order` double(16,2) NOT NULL,
   `payment` double(16,2) NOT NULL,
   `status` enum('PAID','UNPAID') COLLATE utf8mb4_unicode_ci NOT NULL,

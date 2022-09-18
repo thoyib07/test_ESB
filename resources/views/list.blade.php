@@ -33,7 +33,7 @@
                             @foreach ($data['list'] as $li)
                             <tr>
                                 <td>
-                                    <a href="{{route('invoice.update', $li->id)}}" class="btn btn-warning btn-sm btn-edit">Edit</a>
+                                    <a href="{{route('invoice.edit', $li->id)}}" class="btn btn-warning btn-sm btn-edit">Edit</a>
                                     <a href="{{route('invoice.destroy-get', $li->id)}}" class="btn btn-danger btn-sm btn-delete" onclick="return confirm('Are you sure?')">Delete</a>
                                 </td>
                                 <td>{{$li->id}}</td>

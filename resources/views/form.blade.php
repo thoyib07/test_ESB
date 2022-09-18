@@ -20,40 +20,43 @@
                 <div class="col-md-12">
                     <form action="{{$data['action']}}" method="post" class="row" id="formInvoice">
                         @csrf
+                        @if ($data['type'] == 'Update')
+                            @method('PUT')
+                        @endif
                         <h4>Header Invoice</h4>
                         <hr>
                         <div class="col-sm-12">
                             <label for="subject" class="form-label">Subject</label>
-                            <input type="text" class="form-control" id="subject" name="subject" placeholder="" value="" required="">
+                            <input type="text" class="form-control" id="subject" name="subject" placeholder="" value="{{$data['invoice']->subject}}" required="">
                             <span class="subject_error_create alert-danger"></span>
                         </div>
                         <div class="col-sm-6">
                             <label for="issue_date" class="form-label">Issue Data</label>
-                            <input type="date" class="form-control" id="issue_date" name="issue_date" placeholder="" value="" required="" min="{{date('Y-m-d',strtotime('-7 days'))}}">
+                            <input type="date" class="form-control" id="issue_date" name="issue_date" placeholder="" value="{{$data['invoice']->issue_date}}" required="" min="{{date('Y-m-d',strtotime('-7 days'))}}">
                             <span class="issue_date_error_create alert-danger"></span>
                         </div>
                         <div class="col-sm-6">
                             <label for="due_date" class="form-label">Due Data</label>
-                            <input type="date" class="form-control" id="due_date" name="due_date" placeholder="" value="" required="" min="{{date('Y-m-d')}}" max="{{date('Y-m-d',strtotime('+30 days'))}}">
+                            <input type="date" class="form-control" id="due_date" name="due_date" placeholder="" value="{{$data['invoice']->due_date}}" required="" min="{{date('Y-m-d')}}" max="{{date('Y-m-d',strtotime('+30 days'))}}">
                             <span class="due_date_error_create alert-danger"></span>
                         </div>
                         <div class="col-sm-12">
                             <label for="client_id" class="form-label">Client</label>
                             <select class="form-select" id="client_id" name="client_id" required="">
                                 @foreach ($data['client'] as $li)
-                                    <option value="{{$li->id}}">{{$li->name}}</option>
+                                    <option value="{{$li->id}}"@if ($data['invoice']->client_id == $li->id) @selected(true) @endif>{{$li->name}}</option>
                                 @endforeach
                             </select>
                             <span class="client_id_error_create alert-danger"></span>
                         </div>
                         <div class="col-sm-12">
                             <label for="taxCal" class="form-label">Tax</label>
-                            <input type="number" class="form-control" id="taxCal" name="taxCal" placeholder="0" value="" required="" min="0" value="0">
+                            <input type="number" class="form-control" id="taxCal" name="taxCal" placeholder="0" value="{{$data['invoice']->taxCal}}" required="" min="0" value="0">
                             <span class="taxCal_error_create alert-danger"></span>
                         </div>
                         <div class="col-sm-12">
                             <label for="payment" class="form-label">Payment</label>
-                            <input type="number" class="form-control" id="payment" name="payment" placeholder="0" value="" required="" min="0" value="0">
+                            <input type="number" class="form-control" id="payment" name="payment" placeholder="0" value="{{$data['invoice']->payment}}" required="" min="0" value="0">
                             <span class="payment_error_create alert-danger"></span>
                         </div>
                         <h4 class="pt-5">Detail Product</h4>
@@ -104,21 +107,21 @@
                         <div class="row">
                             <div class="form-group col-md-4">
                                 <label>Subtotal <small class="text-red">*</small></label>
-                                <input type="text" name="subtotal" id="subtotal" required readonly class="form-control d-none">
+                                <input type="text" name="subtotal" id="subtotal" value="{{$data['invoice']->subtotal}}" required readonly class="form-control d-none">
                                 <br>
                                 <h4 id="text_subtotal">Rp. 0</h4>
                                 <span class="subtotal_error_create alert-danger"></span>
                             </div>
                             <div class="form-group col-md-4">
                                 <label>Tax <small class="text-red">*</small></label>
-                                <input type="text" name="tax" id="tax" required readonly class="form-control d-none">
+                                <input type="text" name="tax" id="tax" value="{{$data['invoice']->tax}}" required readonly class="form-control d-none">
                                 <br>
                                 <h4 id="text_tax">Rp. 0</h4>
                                 <span class="tax_error_create alert-danger"></span>
                             </div>
                             <div class="form-group col-md-4">
                                 <label>Total Order <small class="text-red">*</small></label>
-                                <input type="text" name="total_order" id="total_order" required readonly class="form-control d-none">
+                                <input type="text" name="total_order" id="total_order" value="{{$data['invoice']->total_order}}" required readonly class="form-control d-none">
                                 <br>
                                 <h4 id="text_total_order">Rp. 0</h4>
                                 <span class="total_order_error_create alert-danger"></span>
@@ -163,6 +166,9 @@
                         </tr>`;
 
         $(document).ready(function() {
+            @if ($data['type'] == 'Update')
+            loadDataDetail();
+            @endif
         });
 
         function clearValue() {
@@ -171,7 +177,39 @@
             $('#qty0').val('');
             $('#selling_price0').val('');
             $('#total0').val('');
+            update_text_result(parseFloat($('#subtotal').val()),parseFloat($('#tax').val()));
         }
+
+        function loadDataDetail() {
+        let jsonString = `@php
+            $tmpData = array();
+            foreach ($data['invoice']->DetailInvoice as $key => $val) {
+                if($val->Product){
+                    $tmpData[] = [
+                        'product_id' => $val->product_id,
+                        'product_name' => ($val->Product)?$val->Product->name:null,
+                        'qty' => $val->qty,
+                        'selling_price' => $val->selling_price,
+                    ];
+                }
+            }
+            echo json_encode($tmpData);
+        @endphp`;
+        
+        $.map(JSON.parse(jsonString), function (val, idx) {
+            // console.log(val,idx);
+            if (idx > 0) {
+                $("#addrow").click();
+            }
+            $('#product_id'+idx).val(val.product_id);
+            $('#product_name'+idx).val(val.product_name);
+            $('#qty'+idx).val(val.qty);
+            $('#selling_price'+idx).val(val.selling_price);
+            $('#total'+idx).val(val.qty * val.selling_price);
+        });
+        
+        update_text_result(parseFloat($('#subtotal').val()),parseFloat($('#tax').val()));
+    }
 
         $("#addrow").on("click", function () {
             var newRow = $("<tr>");
@@ -194,7 +232,8 @@
 
         $("table#myTable").on("click", ".ibtnDel", function (event) {
             $(this).closest("tr").remove();       
-            counter -= 1
+            counter -= 1;
+            update_text_result(parseFloat($('#subtotal').val()),parseFloat($('#tax').val()));
         });
 
         // open a pop up window
@@ -253,7 +292,11 @@
             $('#subtotal').val(finalHarga);
             $('#tax').val(finalTax);
             $('#total_order').val(finalHarga+finalTax);
+            update_text_result(finalHarga,finalTax);
+        }
 
+        function update_text_result(finalHarga,finalTax) {
+            console.log('update text');
             $('#text_subtotal').html(new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(finalHarga));
             $('#text_tax').html(new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(finalTax));
             $('#text_total_order').html(new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(finalHarga+finalTax));

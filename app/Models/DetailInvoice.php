@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DetailInvoice extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory;
+    // SoftDeletes;
 
     protected $table= 'detail_invoices';
     protected $primaryKey = 'id';

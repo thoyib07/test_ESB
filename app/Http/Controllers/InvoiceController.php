@@ -55,6 +55,7 @@ class InvoiceController extends Controller
                 'issue_date' => ['required'],
                 'due_date' => ['required'],
                 'tax' => ['required'],
+                'taxCal' => ['required'],
                 'subtotal' => ['required'],
                 'total_order' => ['required'],
                 'payment' => ['required'],
@@ -74,6 +75,7 @@ class InvoiceController extends Controller
             $data['due_date'] = $request->due_date;
             $data['subtotal'] = $request->subtotal;
             $data['tax'] = $request->tax;
+            $data['taxCal'] = $request->taxCal;
             $data['total_order'] = $request->total_order;
             $data['payment'] = $request->payment;
 
@@ -139,7 +141,13 @@ class InvoiceController extends Controller
      */
     public function edit($id)
     {
-        //
+        
+        $data = array();
+        $data['type'] = "Update";
+        $data['action'] = route('invoice.update',$id);
+        $data['client'] = Client::query()->aktif()->get();
+        $data['invoice'] = Invoice::with(['DetailInvoice'])->where('id', $id)->first();
+        return view('form',compact('data'));
     }
 
     /**
@@ -151,7 +159,84 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            DB::beginTransaction();
+
+            $validateData = Validator::make($request->all(), [
+                'subject' => ['required'],
+                'client_id' => ['required'],
+                'issue_date' => ['required'],
+                'due_date' => ['required'],
+                'tax' => ['required'],
+                'taxCal' => ['required'],
+                'subtotal' => ['required'],
+                'total_order' => ['required'],
+                'payment' => ['required'],
+                // ---- Detail Order
+                'product_id.*' => ['required'],
+                'qty.*' => ['required'],
+                'selling_price.*' => ['required'],
+            ]);
+
+            if ($validateData->fails()) {
+                return response()->json($validateData->errors(), 400);
+            }
+            $editData = Invoice::where('id', $id)->aktif()->first();
+
+            if ($editData) {
+                $data['client_id'] = $request->client_id;
+                $data['subject'] = $request->subject;
+                $data['issue_date'] = $request->issue_date;
+                $data['due_date'] = $request->due_date;
+                $data['subtotal'] = $request->subtotal;
+                $data['tax'] = $request->tax;
+                $data['taxCal'] = $request->taxCal;
+                $data['total_order'] = $request->total_order;
+                $data['payment'] = $request->payment;
+
+                if ($data['payment'] - $data['total_order'] < 0) {
+                    $data['status'] = 'PAID';
+                } else {
+                    $data['status'] = 'UNPAID';
+                }
+                $data['updated_at'] = now();
+                $editData->update($data);
+                // Delete Detail
+                DetailInvoice::where('invoice_id', '=', $id)->delete();
+                // Insert New Detail
+                $data2['invoice_id'] = $id;
+                foreach ($request->product_id as $key => $val) {
+                    $data2['product_id'] = $val;
+                    $data2['desc'] = $request->product_name[$key];
+                    $data2['qty'] = $request->qty[$key];
+                    $data2['selling_price'] = $request->selling_price[$key];
+                    $data2['created_at'] = now();
+                    // dump($data2);
+                    $createDetailData = DetailInvoice::create($data2);
+                }
+
+                if ($createDetailData) {
+                    DB::commit();
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Sukses Mengubah Data',
+                    ], 200);
+                }
+            } else {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal Mengubah Data'
+                ], 500);
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'detail' => $th,
+                'message' => 'Gagal Menambahkan Data'
+            ], 500);
+        }
     }
 
     /**
@@ -165,8 +250,8 @@ class InvoiceController extends Controller
         try {
             DB::beginTransaction();
             $data = Invoice::where('id', $id)->first()->delete();
-            $dataDetail = DetailInvoice::where('invoice_id',$id)->delete();
-            
+            $dataDetail = DetailInvoice::where('invoice_id',$id)->update(['deleted_at' => Carbon::now()]);
+
             DB::commit();
             return redirect()->route('invoice.index');
         } catch (\Throwable $th) {
