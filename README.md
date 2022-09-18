@@ -15,3 +15,7 @@ Berikut adalah User & Pass untuk menggunakan aplikasi ini
 
 - User : super-admin@admin.com
 - Pass : password123
+
+## Database & Struktur Tabel
+
+Untuk database & struktur tabel ada di file sql yang ada di root dir, atau bisa juga menjalankan "php artisan migrate" untuk melakukan proses migration

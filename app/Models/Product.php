@@ -15,6 +15,11 @@ class Product extends Model
     protected $guarded = ['id'];
     protected $fillable = [];
 
+    public function ItemType()
+    {
+        return $this->belongsTo(ItemType::class,'item_type_id','id');
+    }
+
     public function scopeAktif($query)
     {;
         return $query->whereNull('deleted_at');

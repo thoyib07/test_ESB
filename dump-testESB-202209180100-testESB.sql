@@ -168,12 +168,13 @@ DROP TABLE IF EXISTS `invoices`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `invoices` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `client_id` int(10) unsigned NOT NULL,
   `subject` varchar(555) COLLATE utf8mb4_unicode_ci NOT NULL,
   `issue_date` date NOT NULL,
   `due_date` date NOT NULL,
   `subtotal` double(16,2) NOT NULL,
   `tax` double(16,2) NOT NULL,
-  `total` double(16,2) NOT NULL,
+  `total_order` double(16,2) NOT NULL,
   `payment` double(16,2) NOT NULL,
   `status` enum('PAID','UNPAID') COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,

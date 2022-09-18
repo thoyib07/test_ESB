@@ -15,12 +15,13 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
+            $table->integer('client_id')->unsigned();
             $table->string('subject',555);
             $table->date('issue_date');
             $table->date('due_date');
             $table->float('subtotal',16,2);
             $table->float('tax',16,2);
-            $table->float('total',16,2);
+            $table->float('total_order',16,2);
             $table->float('payment',16,2);
             $table->enum('status',['PAID','UNPAID']);
             $table->timestamps();

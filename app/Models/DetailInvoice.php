@@ -15,6 +15,16 @@ class DetailInvoice extends Model
     protected $guarded = ['id'];
     protected $fillable = [];
 
+    public function Invoice()
+    {
+        return $this->belongsTo(Invoice::class,'invoice_id','id');
+    }
+
+    public function Product()
+    {
+        return $this->belongsTo(Product::class,'product_id','id');
+    }
+
     public function scopeAktif($query)
     {;
         return $query->whereNull('deleted_at');

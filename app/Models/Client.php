@@ -15,6 +15,16 @@ class Client extends Model
     protected $guarded = ['id'];
     protected $fillable = [];
 
+    public function City()
+    {
+        return $this->belongsTo(City::class,'city_id','id');
+    
+    }
+    public function Counrty()
+    {
+        return $this->belongsTo(Country::class,'country_id','id');
+    }
+
     public function scopeAktif($query)
     {;
         return $query->whereNull('deleted_at');

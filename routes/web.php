@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PopController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,10 +15,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
-Route::get('/test',function () {
-    echo "Masuk sini";
+// Route::get('/',"");
+Route::redirect('/', '/invoice');
+
+Route::resource('invoice', InvoiceController::class);
+Route::get('invoice/destroy/{id}',[InvoiceController::class, 'destroy'])->name('invoice.destroy-get');
+
+
+Route::prefix('popup')->group(function () {
+    Route::get('barang', [PopController::class, 'barang'])->name('pop-barang');
 });
