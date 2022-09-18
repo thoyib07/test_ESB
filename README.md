@@ -11,11 +11,10 @@
 
 GIT repo ini diperuntukan untuk menyimpan data code untuk keperluan technical test ESB - PHP
 
-Berikut adalah User & Pass untuk menggunakan aplikasi ini
-
-- User : super-admin@admin.com
-- Pass : password123
-
 ## Database & Struktur Tabel
 
 Untuk database & struktur tabel ada di file sql yang ada di root dir, atau bisa juga menjalankan "php artisan migrate" untuk melakukan proses migration
+
+## List API
+- Get All Invoice (GET => http://localhost:8000/api/invoice/)
+- Get Invoice By Id (GET => http://localhost:8000/api/invoice/{id})
